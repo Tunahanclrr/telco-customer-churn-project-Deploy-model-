@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Churn Prediction</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0c10;
+      --surface: #111318;
+      --surface2: #181c24;
+      --border: #252a35;
+      --accent: #00e5a0;
+      --accent2: #ff4d6d;
+      --text: #e8eaf0;
+      --muted: #5a6070;
+      --label: #9ba3b5;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Syne', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+    }
+
+    .logo-text {
+      font-size: 1.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .logo-text span { color: var(--accent); }
+
+    .lang-toggle {
+      display: flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .lang-btn {
+      padding: 8px 18px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      background: transparent;
+      color: var(--muted);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .lang-btn.active {
+      background: var(--accent);
+      color: #000;
+    }
+
+    /* ── LAYOUT ── */
+    .main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 48px 24px 80px;
+    }
+
+    .hero {
+      margin-bottom: 48px;
+    }
+    .hero-tag {
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      color: var(--label);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      max-width: 520px;
+    }
+
+    /* ── FORM CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .card-section {
+      padding: 28px 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card-section:last-child { border-bottom: none; }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .fields-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--label);
+      letter-spacing: 0.01em;
+    }
+    label .hint {
+      font-weight: 400;
+      color: var(--muted);
+      font-size: 0.7rem;
+    }
+
+    .field-desc {
+      font-size: 0.7rem;
+      color: var(--muted);
+      line-height: 1.4;
+      margin-top: 2px;
+    }
+
+    select, input[type="number"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-family: var(--sans);
+      font-size: 0.88rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6070' fill='none' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+    select:focus, input[type="number"]:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(0,229,160,0.1);
+    }
+
+    /* ── SUBMIT ── */
+    .submit-row {
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .btn-predict {
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 32px;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-predict:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 24px rgba(0,229,160,0.3);
+    }
+    .btn-predict:active { transform: translateY(0); }
+    .btn-predict.loading { opacity: 0.7; pointer-events: none; }
+
+    .btn-reset {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 24px;
+      font-family: var(--sans);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .btn-reset:hover { color: var(--text); border-color: var(--muted); }
+
+    /* ── RESULT ── */
+    #result-section {
+      display: none;
+      margin-top: 32px;
+    }
+
+    .result-card {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .result-header {
+      padding: 24px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .result-header.low { background: linear-gradient(135deg, #0a1f15, #0d1a10); border-bottom: 1px solid #1a3a25; }
+    .result-header.high { background: linear-gradient(135deg, #1f0a0d, #1a0d10); border-bottom: 1px solid #3a1a1f; }
+
+    .result-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .result-label.low { color: var(--accent); }
+    .result-label.high { color: var(--accent2); }
+
+    .result-value {
+      font-family: var(--mono);
+      font-size: 3rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+    .result-value.low { color: var(--accent); }
+    .result-value.high { color: var(--accent2); }
+
+    .result-badge {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+    .result-badge.low { background: rgba(0,229,160,0.15); color: var(--accent); }
+    .result-badge.high { background: rgba(255,77,109,0.15); color: var(--accent2); }
+
+    .progress-bar-wrap {
+      padding: 20px 32px;
+      background: var(--surface);
+    }
+    .progress-track {
+      height: 8px;
+      background: var(--surface2);
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      border-radius: 99px;
+      transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+      width: 0%;
+    }
+    .progress-fill.low { background: var(--accent); }
+    .progress-fill.high { background: var(--accent2); }
+
+    .result-info {
+      padding: 20px 32px;
+      background: var(--surface);
+      font-size: 0.88rem;
+      color: var(--label);
+      line-height: 1.6;
+      border-top: 1px solid var(--border);
+    }
+
+    /* ── ERROR ── */
+    .error-msg {
+      display: none;
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: rgba(255,77,109,0.1);
+      border: 1px solid rgba(255,77,109,0.3);
+      border-radius: 10px;
+      color: var(--accent2);
+      font-size: 0.85rem;
+      font-family: var(--mono);
+    }
+
+    /* ── ENDPOINT ── */
+    .endpoint-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+    .endpoint-row input {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      width: 280px;
+      outline: none;
+    }
+    .endpoint-row input:focus { border-color: var(--accent); }
+
+    @media (max-width: 600px) {
+      header { padding: 16px 20px; }
+      .main { padding: 32px 16px 60px; }
+      .card-section { padding: 20px 18px; }
+      .submit-row { padding: 20px 18px; }
+      .result-header { padding: 18px 20px; }
+      .progress-bar-wrap { padding: 16px 20px; }
+      .result-info { padding: 16px 20px; }
+      .fields-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">📉</div>
+    <div class="logo-text">Churn<span>AI</span></div>
+  </div>
+  <div class="lang-toggle">
+    <button class="lang-btn active" onclick="setLang('tr')" id="btn-tr">TR</button>
+    <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+  </div>
+</header>
+
+<div class="main">
+  <div class="hero">
+    <div class="hero-tag" id="hero-tag">Müşteri Kayıp Tahmini</div>
+    <h1 id="hero-title">Müşteriniz ayrılacak mı?</h1>
+    <p id="hero-desc">Müşteri bilgilerini girerek makine öğrenmesi modelinin kayıp (churn) olasılığını tahmin etmesini sağlayın.</p>
+    <div class="endpoint-row" style="margin-top:16px;">
+      <span id="api-label">API Endpoint:</span>
+      <input type="text" id="api-endpoint" value="http://127.0.0.1:8000/predict" />
+    </div>
+  </div>
+
+  <div class="card">
+    <!-- SECTION 1: Demografik -->
+    <div class="card-section">
+      <div class="section-label" id="sec1-label">Demografik Bilgiler</div>
+      <div class="fields-grid">
+
+        <div class="field">
+          <label id="lbl-gender">Cinsiyet <span class="hint" id="hint-gender">(0 = Kadın, 1 = Erkek)</span></label>
+          <select id="gender">
+            <option value="0" id="opt-female">0 — Kadın</option>
+            <option value="1" id="opt-male">1 — Erkek</option>
+          </select>
+          <div class="field-desc" id="desc-gender">Müşterinin biyolojik cinsiyeti. Churn analizinde demografik bir değişken olarak kullanılır.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-senior">Yaşlı Vatandaş <span class="hint" id="hint-senior">(0 = Hayır, 1 = Evet)</span></label>
+          <select id="SeniorCitizen">
+            <option value="0" id="opt-not-senior">0 — Hayır</option>
+            <option value="1" id="opt-is-senior">1 — Evet</option>
+          </select>
+          <div class="field-desc" id="desc-senior">Müşterinin 65 yaş ve üzerinde olup olmadığı. Yaşlı müşteriler farklı hizmet kalıpları sergileyebilir.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-partner">Partner <span class="hint" id="hint-partner">(0 = Yok, 1 = Var)</span></label>
+          <select id="Partner">
+            <option value="0" id="opt-no-partner">0 — Yok</option>
+            <option value="1" id="opt-yes-partner">1 — Var</option>
+          </select>
+          <div class="field-desc" id="desc-partner">Müşterinin eşi veya birlikte yaşadığı partneri var mı? Partneri olan müşteriler genellikle daha az churn gösterir.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-dep">Bağımlı Kişi <span class="hint" id="hint-dep">(0 = Yok, 1 = Var)</span></label>
+          <select id="Dependents">
+            <option value="0" id="opt-no-dep">0 — Yok</option>
+            <option value="1" id="opt-yes-dep">1 — Var</option>
+          </select>
+          <div class="field-desc" id="desc-dep">Müşterinin bakmakla yükümlü olduğu kişiler (çocuk, yaşlı ebeveyn vb.) var mı? Aile sorumluluğu abonelik sürekliliğini etkiler.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-tenure">Müşteri Süresi <span class="hint" id="hint-tenure">(ay cinsinden, 0–72)</span></label>
+          <input type="number" id="tenure" value="12" min="0" max="120" />
+          <div class="field-desc" id="desc-tenure">Müşterinin şirkette geçirdiği toplam ay sayısı. Uzun süreli müşteriler genellikle daha sadık olup daha düşük churn riski taşır.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 2: Hizmetler -->
+    <div class="card-section">
+      <div class="section-label" id="sec2-label">Hizmet Bilgileri</div>
+      <div class="fields-grid">
+
+        <div class="field">
+          <label id="lbl-phone">Çoklu Telefon Hattı <span class="hint" id="hint-phone">(MultipleLines)</span></label>
+          <select id="MultipleLines">
+            <option value="No phone service" id="opt-nophone">Telefon Hizmeti Yok</option>
+            <option value="No" id="opt-singleline">Tek Hat</option>
+            <option value="Yes" id="opt-multiline">Çoklu Hat</option>
+          </select>
+          <div class="field-desc" id="desc-phone">Müşterinin telefon hizmeti aboneliği var mı, varsa birden fazla hat kullanıyor mu?</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-internet">İnternet Hizmeti Türü <span class="hint" id="hint-internet">(InternetService)</span></label>
+          <select id="InternetService">
+            <option value="No" id="opt-nointernet">Yok</option>
+            <option value="DSL" id="opt-dsl">DSL — Bakır hat, orta hız</option>
+            <option value="Fiber optic" id="opt-fiber">Fiber Optik — Yüksek hız</option>
+          </select>
+          <div class="field-desc" id="desc-internet">Müşterinin kullandığı internet bağlantı teknolojisi. Fiber optik müşterilerde churn oranı DSL'e göre daha yüksek gözlemlenir.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-security">Çevrimiçi Güvenlik <span class="hint" id="hint-security">(OnlineSecurity)</span></label>
+          <select id="OnlineSecurity">
+            <option value="No internet service" id="opt-sec-noint">İnternet Yok</option>
+            <option value="No" id="opt-sec-no">Yok</option>
+            <option value="Yes" id="opt-sec-yes">Var</option>
+          </select>
+          <div class="field-desc" id="desc-security">Müşterinin antivirüs, güvenlik duvarı gibi çevrimiçi güvenlik ek paketi alıp almadığı.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-backup">Çevrimiçi Yedekleme <span class="hint" id="hint-backup">(OnlineBackup)</span></label>
+          <select id="OnlineBackup">
+            <option value="No internet service" id="opt-bk-noint">İnternet Yok</option>
+            <option value="No" id="opt-bk-no">Yok</option>
+            <option value="Yes" id="opt-bk-yes">Var</option>
+          </select>
+          <div class="field-desc" id="desc-backup">Müşterinin bulut tabanlı otomatik yedekleme hizmetine abone olup olmadığı.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-device">Cihaz Koruma Paketi <span class="hint" id="hint-device">(DeviceProtection)</span></label>
+          <select id="DeviceProtection">
+            <option value="No internet service" id="opt-dev-noint">İnternet Yok</option>
+            <option value="No" id="opt-dev-no">Yok</option>
+            <option value="Yes" id="opt-dev-yes">Var</option>
+          </select>
+          <div class="field-desc" id="desc-device">Müşterinin cihaz hasar, kayıp veya arıza durumlarına karşı sigorta/koruma paketine sahip olup olmadığı.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-tech">Teknik Destek <span class="hint" id="hint-tech">(TechSupport)</span></label>
+          <select id="TechSupport">
+            <option value="No internet service" id="opt-tech-noint">İnternet Yok</option>
+            <option value="No" id="opt-tech-no">Yok</option>
+            <option value="Yes" id="opt-tech-yes">Var</option>
+          </select>
+          <div class="field-desc" id="desc-tech">Müşterinin 7/24 öncelikli teknik destek hizmetine abone olup olmadığı. Teknik destek alan müşteriler genellikle daha az churn yapar.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-tv">TV Yayın Hizmeti <span class="hint" id="hint-tv">(StreamingTV)</span></label>
+          <select id="StreamingTV">
+            <option value="No internet service" id="opt-tv-noint">İnternet Yok</option>
+            <option value="No" id="opt-tv-no">Yok</option>
+            <option value="Yes" id="opt-tv-yes">Var</option>
+          </select>
+          <div class="field-desc" id="desc-tv">Müşterinin internet üzerinden canlı TV kanallarına erişim hizmetine abone olup olmadığı.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-movies">Film/Dizi Yayını <span class="hint" id="hint-movies">(StreamingMovies)</span></label>
+          <select id="StreamingMovies">
+            <option value="No internet service" id="opt-mv-noint">İnternet Yok</option>
+            <option value="No" id="opt-mv-no">Yok</option>
+            <option value="Yes" id="opt-mv-yes">Var</option>
+          </select>
+          <div class="field-desc" id="desc-movies">Müşterinin internet üzerinden film ve dizi içeriklerine erişim hizmetine abone olup olmadığı.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SECTION 3: Sözleşme & Ödeme -->
+    <div class="card-section">
+      <div class="section-label" id="sec3-label">Sözleşme & Ödeme</div>
+      <div class="fields-grid">
+
+        <div class="field">
+          <label id="lbl-contract">Sözleşme Türü <span class="hint" id="hint-contract">(Contract)</span></label>
+          <select id="Contract">
+            <option value="Month-to-month" id="opt-monthly">Aylık — En esnek, en yüksek risk</option>
+            <option value="One year" id="opt-oneyear">1 Yıllık — Orta bağlılık</option>
+            <option value="Two year" id="opt-twoyear">2 Yıllık — En düşük churn riski</option>
+          </select>
+          <div class="field-desc" id="desc-contract">Müşterinin seçtiği abonelik sözleşme süresi. Aylık sözleşmeler en yüksek churn riskini taşır; uzun vadeli sözleşmeler müşteriyi koruma altına alır.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-paperless">Kağıtsız Fatura <span class="hint" id="hint-paperless">(0 = Hayır, 1 = Evet)</span></label>
+          <select id="PaperlessBilling">
+            <option value="0" id="opt-paper-no">0 — Hayır (Posta ile fatura)</option>
+            <option value="1" id="opt-paper-yes">1 — Evet (Dijital fatura)</option>
+          </select>
+          <div class="field-desc" id="desc-paperless">Müşterinin faturasını dijital ortamda (e-posta/uygulama) mı yoksa posta yoluyla mı aldığı. Kağıtsız fatura kullananlar hafif daha yüksek churn gösterebilir.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-payment">Ödeme Yöntemi <span class="hint" id="hint-payment">(PaymentMethod)</span></label>
+          <select id="PaymentMethod">
+            <option value="Electronic check" id="opt-echeck">Elektronik Çek</option>
+            <option value="Mailed check" id="opt-mcheck">Posta Çeki</option>
+            <option value="Bank transfer (automatic)" id="opt-bank">Otomatik Banka Havalesi</option>
+            <option value="Credit card (automatic)" id="opt-cc">Otomatik Kredi Kartı</option>
+          </select>
+          <div class="field-desc" id="desc-payment">Müşterinin aylık ödemesini nasıl yaptığı. Otomatik ödeme yöntemlerini (banka havalesi, kredi kartı) kullananlar genellikle daha düşük churn riski taşır; elektronik çek kullananlar en yüksek risk grubundadır.</div>
+        </div>
+
+        <div class="field">
+          <label id="lbl-monthly">Aylık Ücret <span class="hint" id="hint-monthly">(MonthlyCharges, $)</span></label>
+          <input type="number" id="MonthlyCharges" value="65.00" step="0.01" min="0" />
+          <div class="field-desc" id="desc-monthly">Müşterinin her ay ödediği toplam tutar (USD). Yüksek aylık ücret, özellikle aylık sözleşmelerde churn riskini artırabilir.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-row">
+      <button class="btn-predict" id="btn-predict" onclick="predict()">
+        <span id="btn-predict-text">Tahmin Et</span>
+      </button>
+      <button class="btn-reset" id="btn-reset" onclick="resetForm()">Sıfırla</button>
+      <div class="error-msg" id="error-msg"></div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-section">
+    <div class="result-card">
+      <div class="result-header" id="result-header">
+        <div>
+          <div class="result-label" id="result-label">Kayıp Olasılığı</div>
+          <div class="result-value" id="result-value">—</div>
+        </div>
+        <div class="result-badge" id="result-badge">—</div>
+      </div>
+      <div class="progress-bar-wrap">
+        <div class="progress-track">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+      </div>
+      <div class="result-info" id="result-info">—</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentLang = 'tr';
+
+  const i18n = {
+    tr: {
+      heroTag: 'Müşteri Kayıp Tahmini',
+      heroTitle: 'Müşteriniz ayrılacak mı?',
+      heroDesc: 'Müşteri bilgilerini girerek makine öğrenmesi modelinin kayıp (churn) olasılığını tahmin etmesini sağlayın.',
+      apiLabel: 'API Endpoint:',
+      sec1: 'Demografik Bilgiler',
+      sec2: 'Hizmet Bilgileri',
+      sec3: 'Sözleşme & Ödeme',
+      gender: 'Cinsiyet', genderHint: '(0 = Kadın, 1 = Erkek)',
+      senior: 'Yaşlı Vatandaş', seniorHint: '(0 = Hayır, 1 = Evet)',
+      partner: 'Partner', partnerHint: '(0 = Yok, 1 = Var)',
+      dep: 'Bağımlı Kişi', depHint: '(0 = Yok, 1 = Var)',
+      tenure: 'Müşteri Süresi', tenureHint: '(ay cinsinden, 0–72)',
+      phone: 'Çoklu Telefon Hattı', phoneHint: '(MultipleLines)',
+      internet: 'İnternet Hizmeti Türü', internetHint: '(InternetService)',
+      security: 'Çevrimiçi Güvenlik', securityHint: '(OnlineSecurity)',
+      backup: 'Çevrimiçi Yedekleme', backupHint: '(OnlineBackup)',
+      device: 'Cihaz Koruma Paketi', deviceHint: '(DeviceProtection)',
+      tech: 'Teknik Destek', techHint: '(TechSupport)',
+      tv: 'TV Yayın Hizmeti', tvHint: '(StreamingTV)',
+      movies: 'Film/Dizi Yayını', moviesHint: '(StreamingMovies)',
+      contract: 'Sözleşme Türü', contractHint: '(Contract)',
+      paperless: 'Kağıtsız Fatura', paperlessHint: '(0 = Hayır, 1 = Evet)',
+      payment: 'Ödeme Yöntemi', paymentHint: '(PaymentMethod)',
+      monthly: 'Aylık Ücret', monthlyHint: '(MonthlyCharges, $)',
+      predictBtn: 'Tahmin Et',
+      resetBtn: 'Sıfırla',
+      loading: 'Tahmin yapılıyor...',
+      resultLabel: 'Kayıp Olasılığı',
+      low: 'Düşük Risk', high: 'Yüksek Risk',
+      infoLow: '✅ Müşteri düşük kayıp riskiyle değerlendiriliyor. Sadakat programları ile bağlılığı güçlendirilebilir.',
+      infoHigh: '⚠️ Müşteri yüksek kayıp riskiyle değerlendiriliyor. Proaktif müşteri tutma stratejileri uygulanmalı.',
+      errorConn: 'Bağlantı hatası — API endpoint erişilebilir mi?',
+      opts: {
+        female: '0 — Kadın', male: '1 — Erkek',
+        notSenior: '0 — Hayır', isSenior: '1 — Evet',
+        noPartner: '0 — Yok', yesPartner: '1 — Var',
+        noDep: '0 — Yok', yesDep: '1 — Var',
+        nophone: 'Telefon Hizmeti Yok', singleline: 'Tek Hat', multiline: 'Çoklu Hat',
+        nointernet: 'Yok', dsl: 'DSL', fiber: 'Fiber Optik',
+        secNoint: 'İnternet Yok', secNo: 'Yok', secYes: 'Var',
+        monthly: 'Aylık', oneyear: 'Yıllık', twoyear: '2 Yıllık',
+        paperNo: '0 — Hayır', paperYes: '1 — Evet',
+        echeck: 'Elektronik Çek', mcheck: 'Posta Çeki', bank: 'Banka Havalesi (Otomatik)', cc: 'Kredi Kartı (Otomatik)',
+      }
+    },
+    en: {
+      heroTag: 'Customer Churn Prediction',
+      heroTitle: 'Will your customer leave?',
+      heroDesc: 'Enter customer information and let the ML model predict the probability of churn.',
+      apiLabel: 'API Endpoint:',
+      sec1: 'Demographic Info',
+      sec2: 'Services',
+      sec3: 'Contract & Billing',
+      gender: 'Gender', genderHint: '(0 = Female, 1 = Male)',
+      senior: 'Senior Citizen', seniorHint: '(0 = No, 1 = Yes)',
+      partner: 'Partner', partnerHint: '(0 = No, 1 = Yes)',
+      dep: 'Dependents', depHint: '(0 = No, 1 = Yes)',
+      tenure: 'Tenure', tenureHint: '(months, 0–72)',
+      phone: 'Multiple Lines', phoneHint: '(MultipleLines)',
+      internet: 'Internet Service Type', internetHint: '(InternetService)',
+      security: 'Online Security', securityHint: '(OnlineSecurity)',
+      backup: 'Online Backup', backupHint: '(OnlineBackup)',
+      device: 'Device Protection', deviceHint: '(DeviceProtection)',
+      tech: 'Tech Support', techHint: '(TechSupport)',
+      tv: 'Streaming TV', tvHint: '(StreamingTV)',
+      movies: 'Streaming Movies', moviesHint: '(StreamingMovies)',
+      contract: 'Contract Type', contractHint: '(Contract)',
+      paperless: 'Paperless Billing', paperlessHint: '(0 = No, 1 = Yes)',
+      payment: 'Payment Method', paymentHint: '(PaymentMethod)',
+      monthly: 'Monthly Charges', monthlyHint: '(MonthlyCharges, $)',
+      predictBtn: 'Predict Churn',
+      resetBtn: 'Reset',
+      loading: 'Predicting...',
+      resultLabel: 'Churn Probability',
+      low: 'Low Risk', high: 'High Risk',
+      infoLow: '✅ Customer assessed as low churn risk. Loyalty programs can further strengthen retention.',
+      infoHigh: '⚠️ Customer assessed as high churn risk. Proactive retention strategies should be applied.',
+      errorConn: 'Connection error — is the API endpoint reachable?',
+      opts: {
+        female: '0 — Female', male: '1 — Male',
+        notSenior: '0 — No', isSenior: '1 — Yes',
+        noPartner: '0 — No', yesPartner: '1 — Yes',
+        noDep: '0 — No', yesDep: '1 — Yes',
+        nophone: 'No Phone Service', singleline: 'Single Line', multiline: 'Multiple Lines',
+        nointernet: 'None', dsl: 'DSL', fiber: 'Fiber Optic',
+        secNoint: 'No Internet', secNo: 'No', secYes: 'Yes',
+        monthly: 'Month-to-month', oneyear: 'One Year', twoyear: 'Two Years',
+        paperNo: '0 — No', paperYes: '1 — Yes',
+        echeck: 'Electronic Check', mcheck: 'Mailed Check', bank: 'Bank Transfer (Automatic)', cc: 'Credit Card (Automatic)',
+      }
+    }
+  };
+
+  function setLang(lang) {
+    currentLang = lang;
+    document.documentElement.lang = lang;
+    document.getElementById('btn-tr').classList.toggle('active', lang === 'tr');
+    document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+    const t = i18n[lang];
+    document.getElementById('hero-tag').textContent = t.heroTag;
+    document.getElementById('hero-title').textContent = t.heroTitle;
+    document.getElementById('hero-desc').textContent = t.heroDesc;
+    document.getElementById('api-label').textContent = t.apiLabel;
+    document.getElementById('sec1-label').textContent = t.sec1;
+    document.getElementById('sec2-label').textContent = t.sec2;
+    document.getElementById('sec3-label').textContent = t.sec3;
+    document.getElementById('lbl-gender').childNodes[0].textContent = t.gender + ' ';
+    document.getElementById('hint-gender').textContent = t.genderHint;
+    document.getElementById('lbl-senior').childNodes[0].textContent = t.senior + ' ';
+    document.getElementById('hint-senior').textContent = t.seniorHint;
+    document.getElementById('lbl-partner').childNodes[0].textContent = t.partner + ' ';
+    document.getElementById('hint-partner').textContent = t.partnerHint;
+    document.getElementById('lbl-dep').childNodes[0].textContent = t.dep + ' ';
+    document.getElementById('hint-dep').textContent = t.depHint;
+    document.getElementById('lbl-tenure').childNodes[0].textContent = t.tenure + ' ';
+    document.getElementById('hint-tenure').textContent = t.tenureHint;
+    document.getElementById('lbl-phone').childNodes[0].textContent = t.phone + ' ';
+    document.getElementById('hint-phone').textContent = t.phoneHint;
+    document.getElementById('lbl-internet').childNodes[0].textContent = t.internet + ' ';
+    document.getElementById('hint-internet').textContent = t.internetHint;
+    document.getElementById('lbl-security').childNodes[0].textContent = t.security + ' ';
+    document.getElementById('hint-security').textContent = t.securityHint;
+    document.getElementById('lbl-backup').childNodes[0].textContent = t.backup + ' ';
+    document.getElementById('hint-backup').textContent = t.backupHint;
+    document.getElementById('lbl-device').childNodes[0].textContent = t.device + ' ';
+    document.getElementById('hint-device').textContent = t.deviceHint;
+    document.getElementById('lbl-tech').childNodes[0].textContent = t.tech + ' ';
+    document.getElementById('hint-tech').textContent = t.techHint;
+    document.getElementById('lbl-tv').childNodes[0].textContent = t.tv + ' ';
+    document.getElementById('hint-tv').textContent = t.tvHint;
+    document.getElementById('lbl-movies').childNodes[0].textContent = t.movies + ' ';
+    document.getElementById('hint-movies').textContent = t.moviesHint;
+    document.getElementById('lbl-contract').childNodes[0].textContent = t.contract + ' ';
+    document.getElementById('hint-contract').textContent = t.contractHint;
+    document.getElementById('lbl-paperless').childNodes[0].textContent = t.paperless + ' ';
+    document.getElementById('hint-paperless').textContent = t.paperlessHint;
+    document.getElementById('lbl-payment').childNodes[0].textContent = t.payment + ' ';
+    document.getElementById('hint-payment').textContent = t.paymentHint;
+    document.getElementById('lbl-monthly').childNodes[0].textContent = t.monthly + ' ';
+    document.getElementById('hint-monthly').textContent = t.monthlyHint;
+    document.getElementById('btn-predict-text').textContent = t.predictBtn;
+    document.getElementById('btn-reset').textContent = t.resetBtn;
+
+    const o = t.opts;
+    document.getElementById('opt-female').textContent = o.female;
+    document.getElementById('opt-male').textContent = o.male;
+    document.getElementById('opt-not-senior').textContent = o.notSenior;
+    document.getElementById('opt-is-senior').textContent = o.isSenior;
+    document.getElementById('opt-no-partner').textContent = o.noPartner;
+    document.getElementById('opt-yes-partner').textContent = o.yesPartner;
+    document.getElementById('opt-no-dep').textContent = o.noDep;
+    document.getElementById('opt-yes-dep').textContent = o.yesDep;
+    document.getElementById('opt-nophone').textContent = o.nophone;
+    document.getElementById('opt-singleline').textContent = o.singleline;
+    document.getElementById('opt-multiline').textContent = o.multiline;
+    document.getElementById('opt-nointernet').textContent = o.nointernet;
+    document.getElementById('opt-dsl').textContent = o.dsl;
+    document.getElementById('opt-fiber').textContent = o.fiber;
+    ['sec','bk','dev','tech','tv','mv'].forEach(prefix => {
+      document.getElementById(`opt-${prefix}-noint`).textContent = o.secNoint;
+      document.getElementById(`opt-${prefix}-no`).textContent = o.secNo;
+      document.getElementById(`opt-${prefix}-yes`).textContent = o.secYes;
+    });
+    document.getElementById('opt-monthly').textContent = o.monthly;
+    document.getElementById('opt-oneyear').textContent = o.oneyear;
+    document.getElementById('opt-twoyear').textContent = o.twoyear;
+    document.getElementById('opt-paper-no').textContent = o.paperNo;
+    document.getElementById('opt-paper-yes').textContent = o.paperYes;
+    document.getElementById('opt-echeck').textContent = o.echeck;
+    document.getElementById('opt-mcheck').textContent = o.mcheck;
+    document.getElementById('opt-bank').textContent = o.bank;
+    document.getElementById('opt-cc').textContent = o.cc;
+  }
+
+  function g(id) { return document.getElementById(id); }
+
+  async function predict() {
+    const t = i18n[currentLang];
+    const btn = g('btn-predict');
+    const errMsg = g('error-msg');
+    errMsg.style.display = 'none';
+    btn.classList.add('loading');
+    g('btn-predict-text').textContent = t.loading;
+
+    const payload = {
+      gender: parseInt(g('gender').value),
+      SeniorCitizen: parseInt(g('SeniorCitizen').value),
+      Partner: parseInt(g('Partner').value),
+      Dependents: parseInt(g('Dependents').value),
+      tenure: parseInt(g('tenure').value),
+      MultipleLines: g('MultipleLines').value,
+      InternetService: g('InternetService').value,
+      OnlineSecurity: g('OnlineSecurity').value,
+      OnlineBackup: g('OnlineBackup').value,
+      DeviceProtection: g('DeviceProtection').value,
+      TechSupport: g('TechSupport').value,
+      StreamingTV: g('StreamingTV').value,
+      StreamingMovies: g('StreamingMovies').value,
+      Contract: g('Contract').value,
+      PaperlessBilling: parseInt(g('PaperlessBilling').value),
+      PaymentMethod: g('PaymentMethod').value,
+      MonthlyCharges: parseFloat(g('MonthlyCharges').value),
+    };
+
+    try {
+      const endpoint = g('api-endpoint').value.trim();
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      const prob = data.churn_probability;
+      showResult(prob);
+    } catch (err) {
+      errMsg.textContent = `${t.errorConn} (${err.message})`;
+      errMsg.style.display = 'block';
+    } finally {
+      btn.classList.remove('loading');
+      g('btn-predict-text').textContent = t.predictBtn;
+    }
+  }
+
+  function showResult(prob) {
+    const t = i18n[currentLang];
+    const pct = Math.round(prob * 100);
+    const isHigh = prob >= 0.5;
+    const cls = isHigh ? 'high' : 'low';
+
+    const section = g('result-section');
+    const header = g('result-header');
+    const label = g('result-label');
+    const value = g('result-value');
+    const badge = g('result-badge');
+    const fill = g('progress-fill');
+    const info = g('result-info');
+
+    header.className = `result-header ${cls}`;
+    label.className = `result-label ${cls}`;
+    label.textContent = t.resultLabel;
+    value.className = `result-value ${cls}`;
+    value.textContent = `${pct}%`;
+    badge.className = `result-badge ${cls}`;
+    badge.textContent = isHigh ? t.high : t.low;
+    fill.className = `progress-fill ${cls}`;
+    info.textContent = isHigh ? t.infoHigh : t.infoLow;
+
+    section.style.display = 'block';
+    requestAnimationFrame(() => {
+      fill.style.width = `${pct}%`;
+    });
+    section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function resetForm() {
+    document.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+    g('tenure').value = 12;
+    g('MonthlyCharges').value = 65;
+    g('result-section').style.display = 'none';
+    g('error-msg').style.display = 'none';
+    g('progress-fill').style.width = '0%';
+  }
+</script>
+</body>
+</html>
