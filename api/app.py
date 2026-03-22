@@ -19,13 +19,6 @@ async def root(request: Request):
 
 
 
-@app.post("/predict")
-async def predict(features: ModelInput):
-    input_data = pd.DataFrame([features.model_dump()])
-    proba = model.predict_proba(input_data)[:, 1][0]
-    return {"churn_probability": float(proba)}
-    
-
 class ModelInput(BaseModel):
     gender: int
     SeniorCitizen: int
