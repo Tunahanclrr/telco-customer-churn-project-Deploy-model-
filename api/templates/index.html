@@ -345,29 +345,6 @@
       font-family: var(--mono);
     }
 
-    /* ── ENDPOINT ── */
-    .endpoint-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-    .endpoint-row input {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      border-radius: 6px;
-      padding: 8px 12px;
-      font-family: var(--mono);
-      font-size: 0.75rem;
-      width: 280px;
-      outline: none;
-    }
-    .endpoint-row input:focus { border-color: var(--accent); }
-
     @media (max-width: 600px) {
       header { padding: 16px 20px; }
       .main { padding: 32px 16px 60px; }
@@ -398,10 +375,6 @@
     <div class="hero-tag" id="hero-tag">Müşteri Kayıp Tahmini</div>
     <h1 id="hero-title">Müşteriniz ayrılacak mı?</h1>
     <p id="hero-desc">Müşteri bilgilerini girerek makine öğrenmesi modelinin kayıp (churn) olasılığını tahmin etmesini sağlayın.</p>
-    <div class="endpoint-row" style="margin-top:16px;">
-      <span id="api-label">API Endpoint:</span>
-      <input type="text" id="api-endpoint" value="http://127.0.0.1:8000/predict" />
-    </div>
   </div>
 
   <div class="card">
@@ -625,7 +598,6 @@
       heroTag: 'Müşteri Kayıp Tahmini',
       heroTitle: 'Müşteriniz ayrılacak mı?',
       heroDesc: 'Müşteri bilgilerini girerek makine öğrenmesi modelinin kayıp (churn) olasılığını tahmin etmesini sağlayın.',
-      apiLabel: 'API Endpoint:',
       sec1: 'Demografik Bilgiler',
       sec2: 'Hizmet Bilgileri',
       sec3: 'Sözleşme & Ödeme',
@@ -653,7 +625,7 @@
       low: 'Düşük Risk', high: 'Yüksek Risk',
       infoLow: '✅ Müşteri düşük kayıp riskiyle değerlendiriliyor. Sadakat programları ile bağlılığı güçlendirilebilir.',
       infoHigh: '⚠️ Müşteri yüksek kayıp riskiyle değerlendiriliyor. Proaktif müşteri tutma stratejileri uygulanmalı.',
-      errorConn: 'Bağlantı hatası — API endpoint erişilebilir mi?',
+      errorConn: 'Bağlantı hatası — API erişilebilir mi?',
       opts: {
         female: '0 — Kadın', male: '1 — Erkek',
         notSenior: '0 — Hayır', isSenior: '1 — Evet',
@@ -671,7 +643,6 @@
       heroTag: 'Customer Churn Prediction',
       heroTitle: 'Will your customer leave?',
       heroDesc: 'Enter customer information and let the ML model predict the probability of churn.',
-      apiLabel: 'API Endpoint:',
       sec1: 'Demographic Info',
       sec2: 'Services',
       sec3: 'Contract & Billing',
@@ -699,7 +670,7 @@
       low: 'Low Risk', high: 'High Risk',
       infoLow: '✅ Customer assessed as low churn risk. Loyalty programs can further strengthen retention.',
       infoHigh: '⚠️ Customer assessed as high churn risk. Proactive retention strategies should be applied.',
-      errorConn: 'Connection error — is the API endpoint reachable?',
+      errorConn: 'Connection error — is the API reachable?',
       opts: {
         female: '0 — Female', male: '1 — Male',
         notSenior: '0 — No', isSenior: '1 — Yes',
@@ -724,7 +695,6 @@
     document.getElementById('hero-tag').textContent = t.heroTag;
     document.getElementById('hero-title').textContent = t.heroTitle;
     document.getElementById('hero-desc').textContent = t.heroDesc;
-    document.getElementById('api-label').textContent = t.apiLabel;
     document.getElementById('sec1-label').textContent = t.sec1;
     document.getElementById('sec2-label').textContent = t.sec2;
     document.getElementById('sec3-label').textContent = t.sec3;
@@ -827,8 +797,8 @@
     };
 
     try {
-      const endpoint = g('api-endpoint').value.trim();
-      const response = await fetch(endpoint, {
+      // Relative URL — her ortamda çalışır (local, Render, vb.)
+      const response = await fetch('/predict', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
