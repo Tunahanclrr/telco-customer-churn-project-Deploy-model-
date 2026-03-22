@@ -7,16 +7,24 @@ from fastapi.templating import Jinja2Templates
 
 app = FastAPI()
 
-# HTML klasörü
 templates = Jinja2Templates(directory="api/templates")
+
 with open("models/lgbm_churn_model.pkl", "rb") as f:
     model = joblib.load(f)
 
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
+
+
+@app.post("/predict")
+async def predict(features: ModelInput):
+    input_data = pd.DataFrame([features.model_dump()])
+    proba = model.predict_proba(input_data)[:, 1][0]
+    return {"churn_probability": float(proba)}
+    
 
 class ModelInput(BaseModel):
     gender: int
