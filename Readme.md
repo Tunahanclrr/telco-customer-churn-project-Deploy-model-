@@ -164,10 +164,6 @@ Content-Type: application/json
 4. Push edin (`git push origin feature/amazing-feature`)
 5. Pull Request açın
 
-## 📝 Lisans
-
-Bu proje MIT lisansı altında lisanslanmıştır.
-
 ## 📞 İletişim
 
 Proje ile ilgili sorularınız için issue açabilir veya katkıda bulunabilirsiniz.
